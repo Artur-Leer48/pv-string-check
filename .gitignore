@@ -1,1 +1,5 @@
 /local-learning/
+**/bin/
+**/obj/
+.vs/
+*.user
