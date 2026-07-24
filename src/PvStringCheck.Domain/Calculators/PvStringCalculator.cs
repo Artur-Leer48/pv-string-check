@@ -10,9 +10,12 @@ public sealed class PvStringCalculator
 
         var totalArrayPowerInKilowattsPeak = module.PowerInWatts * totalModules / 1000.0;
 
+        var stringMppVoltageAtStandardTestConditionsInVolts = module.MppVoltageInVolts * configuration.ModulesPerString;
+
         return new CalculationResult
         {
-            TotalArrayPowerInKilowattsPeak = totalArrayPowerInKilowattsPeak
+            TotalArrayPowerInKilowattsPeak = totalArrayPowerInKilowattsPeak,
+            StringMppVoltageAtStandardTestConditionsInVolts = stringMppVoltageAtStandardTestConditionsInVolts
         };
     }
 }
