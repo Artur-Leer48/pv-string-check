@@ -6,16 +6,13 @@ public sealed class PvStringCalculator
 {
     public CalculationResult Calculate(SolarModule module, Inverter inverter, StringConfiguration configuration)
     {
-        if (configuration.ModulesPerString <= 0)
+        var messages = PvStringValidator.ValidateCalculationInputs(inverter, configuration);
+
+        if (messages.Count > 0)
         {
             return new CalculationResult
             {
-                Messages =
-                [
-                    new ValidationMessage(
-                        ValidationSeverity.Error,
-                        "Modules per string must be greater than zero.")
-                ],
+                Messages = messages,
             };
         }
 
@@ -34,20 +31,20 @@ public sealed class PvStringCalculator
 
         var expectedOpenCircuitVoltageAtMinimumTemperatureInVolts = module.OpenCircuitVoltageInVolts * configuration.ModulesPerString * voltageTemperatureFactor;
 
-        List<ValidationMessage> messages = [];
-
-        if (expectedOpenCircuitVoltageAtMinimumTemperatureInVolts > inverter.MaximumDcVoltageInVolts)
-        {
-            messages.Add(new ValidationMessage(
-                ValidationSeverity.Error,
-                "Maximum DC voltage is exceeded."));
-        }
-
         var totalInputCurrentInAmps = module.MppCurrentInAmps * configuration.ParallelStringCount;
 
-        var totalModulePower = module.PowerInWatts * configuration.ModulesPerString * configuration.ParallelStringCount;
+        var totalModulePowerInWatts = module.PowerInWatts * configuration.ModulesPerString * configuration.ParallelStringCount;
 
-        var moduleToInverterPowerRatio = (double)totalModulePower / inverter.RatedAcPowerInWatts;
+        var moduleToInverterPowerRatio = (double)totalModulePowerInWatts / inverter.RatedAcPowerInWatts;
+
+        PvStringValidator.AddElectricalValidationMessages(
+            messages,
+            inverter,
+            stringMppVoltageAtStandardTestConditionsInVolts,
+            expectedOpenCircuitVoltageAtMinimumTemperatureInVolts,
+            totalInputCurrentInAmps,
+            totalModulePowerInWatts,
+            moduleToInverterPowerRatio);
 
         return new CalculationResult
         {
