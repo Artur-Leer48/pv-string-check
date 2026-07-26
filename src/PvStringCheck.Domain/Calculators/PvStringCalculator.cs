@@ -24,12 +24,17 @@ public sealed class PvStringCalculator
 
         var totalInputCurrentInAmps = module.MppCurrentInAmps * configuration.ParallelStringCount;
 
+        var totalModulePower = module.PowerInWatts * configuration.ModulesPerString * configuration.ParallelStringCount;
+
+        var moduleToInverterPowerRatio = (double)totalModulePower / inverter.RatedAcPowerInWatts;
+
         return new CalculationResult
         {
             TotalArrayPowerInKilowattsPeak = totalArrayPowerInKilowattsPeak,
             StringMppVoltageAtStandardTestConditionsInVolts = stringMppVoltageAtStandardTestConditionsInVolts,
             ExpectedOpenCircuitVoltageAtMinimumTemperatureInVolts = expectedOpenCircuitVoltageAtMinimumTemperatureInVolts,
             TotalInputCurrentInAmps = totalInputCurrentInAmps,
+            ModuleToInverterPowerRatio = moduleToInverterPowerRatio,
         };
     }
 }

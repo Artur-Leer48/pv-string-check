@@ -13,7 +13,8 @@ public sealed class PvStringCalculatorTests
 
         var inverter = new Inverter
         {
-            Name = "Test Inverter"
+            Name = "Test Inverter",
+            RatedAcPowerInWatts = 6000
         };
 
         var configuration = new StringConfiguration { ModulesPerString = 5, ParallelStringCount = 2 };
@@ -35,7 +36,8 @@ public sealed class PvStringCalculatorTests
 
         var inverter = new Inverter
         {
-            Name = "Test Inverter"
+            Name = "Test Inverter",
+            RatedAcPowerInWatts = 6000
         };
 
         var configuration = new StringConfiguration { ModulesPerString = 5, ParallelStringCount = 2 };
@@ -57,7 +59,8 @@ public sealed class PvStringCalculatorTests
 
         var inverter = new Inverter
         {
-            Name = "Test Inverter"
+            Name = "Test Inverter",
+            RatedAcPowerInWatts = 6000
         };
 
         var configuration = new StringConfiguration { ModulesPerString = 5, ParallelStringCount = 2, MinimumAmbientTemperatureInDegreesCelsius = 15 };
@@ -79,7 +82,8 @@ public sealed class PvStringCalculatorTests
 
         var inverter = new Inverter
         {
-            Name = "Test Inverter"
+            Name = "Test Inverter",
+            RatedAcPowerInWatts = 6000
         };
 
         var configuration = new StringConfiguration { ModulesPerString = 5, ParallelStringCount = 2 };
@@ -91,5 +95,24 @@ public sealed class PvStringCalculatorTests
 
         // Assert
         Assert.Equal(20, result.TotalInputCurrentInAmps);
+    }
+
+    [Fact]
+    public void Calculate_WhenModuleToInverterPowerRatioIsCalculated_ReturnsCorrectRatio()
+    {
+        // Arrange
+        SolarModule module = new() { Name = "Test Module", PowerInWatts = 400 };
+
+        Inverter inverter = new() { Name = "Test Inverter", RatedAcPowerInWatts = 6000 };
+
+        StringConfiguration configuration = new() { ModulesPerString = 10, ParallelStringCount = 2 };
+
+        PvStringCalculator calculator = new();
+
+        // Act
+        var result = calculator.Calculate(module, inverter, configuration);
+
+        // Assert
+        Assert.Equal(1.33, result.ModuleToInverterPowerRatio, precision: 2);
     }
 }

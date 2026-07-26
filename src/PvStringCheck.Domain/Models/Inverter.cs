@@ -8,4 +8,5 @@ public sealed record Inverter
     public int MaximumMpptVoltageInVolts { get; init; }
     public double MaximumInputCurrentInAmps { get; init; }
     public int MaximumDcPowerInWatts { get; init; }
+    public int RatedAcPowerInWatts { get; init; }
 }
