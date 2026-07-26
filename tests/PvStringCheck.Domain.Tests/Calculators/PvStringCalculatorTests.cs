@@ -6,108 +6,93 @@ namespace PvStringCheck.Domain.Tests.Calculators;
 public sealed class PvStringCalculatorTests
 {
     [Fact]
-    public void Calculate_WhenArrayPowerIsCalculated_ReturnsCorrectKilowattsPeak()
+    public void Calculate_WhenConfigurationIsValid_ReturnsNoMessages()
     {
         // Arrange
-        var module = new SolarModule { Name = "Test Module", PowerInWatts = 500 };
-
-        var inverter = new Inverter
-        {
-            Name = "Test Inverter",
-            RatedAcPowerInWatts = 6000
-        };
-
-        var configuration = new StringConfiguration { ModulesPerString = 5, ParallelStringCount = 2 };
-
+        var module = TestData.ValidModule();
+        var inverter = TestData.ValidInverter();
+        var configuration = TestData.ValidConfiguration();
         var calculator = new PvStringCalculator();
 
         // Act
         var result = calculator.Calculate(module, inverter, configuration);
 
         // Assert
-        Assert.Equal(5, result.TotalArrayPowerInKilowattsPeak);
+        Assert.Empty(result.Messages);
+    }
+
+    [Fact]
+    public void Calculate_WhenArrayPowerIsCalculated_ReturnsCorrectKilowattsPeak()
+    {
+        // Arrange
+        var module = TestData.ValidModule() with { PowerInWatts = 500 };
+        var inverter = TestData.ValidInverter();
+        var configuration = TestData.ValidConfiguration();
+        var calculator = new PvStringCalculator();
+
+        // Act
+        var result = calculator.Calculate(module, inverter, configuration);
+
+        // Assert
+        Assert.Equal(10, result.TotalArrayPowerInKilowattsPeak);
     }
 
     [Fact]
     public void Calculate_WhenStringMppVoltageIsCalculated_ReturnsCorrectVoltage()
     {
         // Arrange
-        var module = new SolarModule { Name = "Test Module", MppVoltageInVolts = 100 };
-
-        var inverter = new Inverter
-        {
-            Name = "Test Inverter",
-            RatedAcPowerInWatts = 6000
-        };
-
-        var configuration = new StringConfiguration { ModulesPerString = 5, ParallelStringCount = 2 };
-
+        var module = TestData.ValidModule() with { MppVoltageInVolts = 60 };
+        var inverter = TestData.ValidInverter();
+        var configuration = TestData.ValidConfiguration();
         var calculator = new PvStringCalculator();
 
         // Act
         var result = calculator.Calculate(module, inverter, configuration);
 
         // Assert
-        Assert.Equal(500, result.StringMppVoltageAtStandardTestConditionsInVolts);
+        Assert.Equal(600, result.StringMppVoltageAtStandardTestConditionsInVolts);
     }
 
     [Fact]
     public void Calculate_WhenExpectedOpenCircuitVoltageAtMinimumTemperatureIsCalculated_ReturnsCorrectVoltage()
     {
         // Arrange
-        var module = new SolarModule { Name = "Test Module", OpenCircuitVoltageInVolts = 100, OpenCircuitVoltageTemperatureCoefficientPercentPerDegreeCelsius = -0.3 };
-
-        var inverter = new Inverter
-        {
-            Name = "Test Inverter",
-            RatedAcPowerInWatts = 6000
-        };
-
-        var configuration = new StringConfiguration { ModulesPerString = 5, ParallelStringCount = 2, MinimumAmbientTemperatureInDegreesCelsius = 15 };
-
+        var module = TestData.ValidModule() with { OpenCircuitVoltageInVolts = 70 };
+        var inverter = TestData.ValidInverter();
+        var configuration = TestData.ValidConfiguration();
         var calculator = new PvStringCalculator();
 
         // Act
         var result = calculator.Calculate(module, inverter, configuration);
 
         // Assert
-        Assert.Equal(515, result.ExpectedOpenCircuitVoltageAtMinimumTemperatureInVolts, precision: 2);
+        Assert.Equal(773.5, result.ExpectedOpenCircuitVoltageAtMinimumTemperatureInVolts, precision: 2);
     }
 
     [Fact]
     public void Calculate_WhenTotalInputCurrentIsCalculated_ReturnsCorrectCurrent()
     {
         // Arrange
-        var module = new SolarModule { Name = "Test Module", MppCurrentInAmps = 10 };
-
-        var inverter = new Inverter
-        {
-            Name = "Test Inverter",
-            RatedAcPowerInWatts = 6000
-        };
-
-        var configuration = new StringConfiguration { ModulesPerString = 5, ParallelStringCount = 2 };
-
+        var module = TestData.ValidModule() with { MppCurrentInAmps = 8 };
+        var inverter = TestData.ValidInverter();
+        var configuration = TestData.ValidConfiguration();
         var calculator = new PvStringCalculator();
 
         // Act
         var result = calculator.Calculate(module, inverter, configuration);
 
         // Assert
-        Assert.Equal(20, result.TotalInputCurrentInAmps);
+        Assert.Equal(16, result.TotalInputCurrentInAmps);
     }
 
     [Fact]
     public void Calculate_WhenModuleToInverterPowerRatioIsCalculated_ReturnsCorrectRatio()
     {
         // Arrange
-        SolarModule module = new() { Name = "Test Module", PowerInWatts = 400 };
-
-        Inverter inverter = new() { Name = "Test Inverter", RatedAcPowerInWatts = 6000 };
-
-        StringConfiguration configuration = new() { ModulesPerString = 10, ParallelStringCount = 2 };
-
-        PvStringCalculator calculator = new();
+        var module = TestData.ValidModule();
+        var inverter = TestData.ValidInverter() with { RatedAcPowerInWatts = 6000 };
+        var configuration = TestData.ValidConfiguration();
+        var calculator = new PvStringCalculator();
 
         // Act
         var result = calculator.Calculate(module, inverter, configuration);
@@ -122,35 +107,9 @@ public sealed class PvStringCalculatorTests
     public void Calculate_WhenModulesPerStringIsNotPositive_ReturnsError(int modulesPerString)
     {
         // Arrange
-        var module = new SolarModule
-        {
-            Name = "Test Module",
-            PowerInWatts = 400,
-            OpenCircuitVoltageInVolts = 50,
-            MppVoltageInVolts = 40,
-            ShortCircuitCurrentInAmps = 11,
-            MppCurrentInAmps = 10,
-            OpenCircuitVoltageTemperatureCoefficientPercentPerDegreeCelsius = -0.3,
-        };
-
-        var inverter = new Inverter
-        {
-            Name = "Test Inverter",
-            MaximumDcVoltageInVolts = 1000,
-            MinimumMpptVoltageInVolts = 200,
-            MaximumMpptVoltageInVolts = 800,
-            MaximumInputCurrentInAmps = 30,
-            MaximumDcPowerInWatts = 10000,
-            RatedAcPowerInWatts = 8000,
-        };
-
-        var configuration = new StringConfiguration
-        {
-            ModulesPerString = modulesPerString,
-            ParallelStringCount = 2,
-            MinimumAmbientTemperatureInDegreesCelsius = -10,
-        };
-
+        var module = TestData.ValidModule();
+        var inverter = TestData.ValidInverter();
+        var configuration = TestData.ValidConfiguration() with { ModulesPerString = modulesPerString };
         var calculator = new PvStringCalculator();
 
         // Act
