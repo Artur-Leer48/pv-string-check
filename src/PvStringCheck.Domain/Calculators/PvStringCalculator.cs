@@ -34,6 +34,15 @@ public sealed class PvStringCalculator
 
         var expectedOpenCircuitVoltageAtMinimumTemperatureInVolts = module.OpenCircuitVoltageInVolts * configuration.ModulesPerString * voltageTemperatureFactor;
 
+        List<ValidationMessage> messages = [];
+
+        if (expectedOpenCircuitVoltageAtMinimumTemperatureInVolts > inverter.MaximumDcVoltageInVolts)
+        {
+            messages.Add(new ValidationMessage(
+                ValidationSeverity.Error,
+                "Maximum DC voltage is exceeded."));
+        }
+
         var totalInputCurrentInAmps = module.MppCurrentInAmps * configuration.ParallelStringCount;
 
         var totalModulePower = module.PowerInWatts * configuration.ModulesPerString * configuration.ParallelStringCount;
@@ -47,6 +56,7 @@ public sealed class PvStringCalculator
             ExpectedOpenCircuitVoltageAtMinimumTemperatureInVolts = expectedOpenCircuitVoltageAtMinimumTemperatureInVolts,
             TotalInputCurrentInAmps = totalInputCurrentInAmps,
             ModuleToInverterPowerRatio = moduleToInverterPowerRatio,
+            Messages = messages,
         };
     }
 }
