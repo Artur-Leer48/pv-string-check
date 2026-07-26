@@ -22,12 +22,14 @@ public sealed class PvStringCalculator
 
         var expectedOpenCircuitVoltageAtMinimumTemperatureInVolts = module.OpenCircuitVoltageInVolts * configuration.ModulesPerString * voltageTemperatureFactor;
 
+        var totalInputCurrentInAmps = module.MppCurrentInAmps * configuration.ParallelStringCount;
 
         return new CalculationResult
         {
             TotalArrayPowerInKilowattsPeak = totalArrayPowerInKilowattsPeak,
             StringMppVoltageAtStandardTestConditionsInVolts = stringMppVoltageAtStandardTestConditionsInVolts,
             ExpectedOpenCircuitVoltageAtMinimumTemperatureInVolts = expectedOpenCircuitVoltageAtMinimumTemperatureInVolts,
+            TotalInputCurrentInAmps = totalInputCurrentInAmps,
         };
     }
 }

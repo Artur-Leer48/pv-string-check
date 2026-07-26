@@ -70,4 +70,26 @@ public sealed class PvStringCalculatorTests
         // Assert
         Assert.Equal(515, result.ExpectedOpenCircuitVoltageAtMinimumTemperatureInVolts, precision: 2);
     }
+
+    [Fact]
+    public void Calculate_WhenTotalInputCurrentIsCalculated_ReturnsCorrectCurrent()
+    {
+        // Arrange
+        var module = new SolarModule { Name = "Test Module", MppCurrentInAmps = 10 };
+
+        var inverter = new Inverter
+        {
+            Name = "Test Inverter"
+        };
+
+        var configuration = new StringConfiguration { ModulesPerString = 5, ParallelStringCount = 2 };
+
+        var calculator = new PvStringCalculator();
+
+        // Act
+        var result = calculator.Calculate(module, inverter, configuration);
+
+        // Assert
+        Assert.Equal(20, result.TotalInputCurrentInAmps);
+    }
 }
