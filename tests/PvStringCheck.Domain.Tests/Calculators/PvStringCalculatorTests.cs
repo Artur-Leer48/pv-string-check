@@ -115,4 +115,50 @@ public sealed class PvStringCalculatorTests
         // Assert
         Assert.Equal(1.33, result.ModuleToInverterPowerRatio, precision: 2);
     }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-1)]
+    public void Calculate_WhenModulesPerStringIsNotPositive_ReturnsError(int modulesPerString)
+    {
+        // Arrange
+        var module = new SolarModule
+        {
+            Name = "Test Module",
+            PowerInWatts = 400,
+            OpenCircuitVoltageInVolts = 50,
+            MppVoltageInVolts = 40,
+            ShortCircuitCurrentInAmps = 11,
+            MppCurrentInAmps = 10,
+            OpenCircuitVoltageTemperatureCoefficientPercentPerDegreeCelsius = -0.3,
+        };
+
+        var inverter = new Inverter
+        {
+            Name = "Test Inverter",
+            MaximumDcVoltageInVolts = 1000,
+            MinimumMpptVoltageInVolts = 200,
+            MaximumMpptVoltageInVolts = 800,
+            MaximumInputCurrentInAmps = 30,
+            MaximumDcPowerInWatts = 10000,
+            RatedAcPowerInWatts = 8000,
+        };
+
+        var configuration = new StringConfiguration
+        {
+            ModulesPerString = modulesPerString,
+            ParallelStringCount = 2,
+            MinimumAmbientTemperatureInDegreesCelsius = -10,
+        };
+
+        var calculator = new PvStringCalculator();
+
+        // Act
+        var result = calculator.Calculate(module, inverter, configuration);
+
+        // Assert
+        var message = Assert.Single(result.Messages);
+        Assert.Equal(ValidationSeverity.Error, message.Severity);
+        Assert.Equal("Modules per string must be greater than zero.", message.Message);
+    }
 }

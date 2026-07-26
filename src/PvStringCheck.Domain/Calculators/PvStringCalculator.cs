@@ -6,11 +6,23 @@ public sealed class PvStringCalculator
 {
     public CalculationResult Calculate(SolarModule module, Inverter inverter, StringConfiguration configuration)
     {
+        if (configuration.ModulesPerString <= 0)
+        {
+            return new CalculationResult
+            {
+                Messages =
+                [
+                    new ValidationMessage(
+                        ValidationSeverity.Error,
+                        "Modules per string must be greater than zero.")
+                ],
+            };
+        }
+
         var totalModules = configuration.ModulesPerString * configuration.ParallelStringCount;
 
         var totalArrayPowerInKilowattsPeak = module.PowerInWatts * totalModules / 1000.0;
         var stringMppVoltageAtStandardTestConditionsInVolts = module.MppVoltageInVolts * configuration.ModulesPerString;
-
 
         var temperatureDifferenceInDegreesCelsius =
         configuration.MinimumAmbientTemperatureInDegreesCelsius - 25.0;
